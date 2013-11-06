@@ -1,0 +1,64 @@
+//apply plugin: 'java'
+apply plugin: 'war'
+//apply plugin: 'jetty'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'tomcat'
+
+buildscript {
+    repositories {
+        add(new org.apache.ivy.plugins.resolver.URLResolver()) {
+            name = 'GitHub'
+            addArtifactPattern 'http://cloud.github.com/downloads/[organisation]/[module]/[module]-[revision].[ext]'
+        }
+    }
+ 
+    dependencies {
+        classpath 'bmuschko:gradle-tomcat-plugin:0.9.5'
+    }
+}
+
+repositories {
+   mavenCentral()
+}
+
+/*
+dependencies {
+    def tomcatVersion = '6.0.29'
+    tomcat "org.apache.tomcat:catalina:${tomcatVersion}",
+           "org.apache.tomcat:coyote:${tomcatVersion}",
+           "org.apache.tomcat:jasper:${tomcatVersion}"
+}*/
+
+
+
+dependencies {
+    //providedCompile 'javax.servlet:servlet-api:3.0',
+    //                'javax.servlet:jsp-api:2.0'
+
+    def tomcatVersion = '7.0.42'
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
+    providedCompile "org.apache.tomcat:tomcat-servlet-api:${tomcatVersion}"
+}
+
+dependencies {
+    //providedCompile 'javax.servlet:servlet-api:3.0.1'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+    compile 'org.springframework:spring-webmvc:3.2.2.RELEASE'
+    compile 'log4j:log4j:1.2.14'
+    runtime 'javax.servlet:jstl:1.2'
+}
+
+task createDir {
+    webAppDir.mkdirs()
+    File infDir = new File(webAppDir, "WEB-INF")
+    println "create folder $infDir.name in $webAppDirName"
+    infDir.mkdir()
+
+    sourceSets*.java.srcDirs*.each { it.mkdirs() }
+    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}
+
